@@ -27,13 +27,17 @@ app.layout = html.Div(children=[
     html.Div([
         html.Div([
             html.Div([
-                html.Img(src='static/CoBrand-IORA_H-web-1.png',style={'width':'90%', 'margin': '5%'}),
+                html.Img(src='/static/CoBrand-IORA_H-web-1.png',style={'height': '50px', 'margin': '15px',
+                # 'width':'90%',
+                }),
             ], className="two columns"),
             html.Div([
-                html.H1(children='Intraday Queue Analytics'),
+                html.Img(src='/static/vaxQALogo.png',style={'height': '60px','margin': '10px',}),
             ], className="ten columns"),
-        ], className="row",
-        ),
+                # html.Div([
+                #     html.H4(children='(Vaccine Appointments Optimization Suite)')
+                # ]),
+        ], className="row",),
     ]),
 
     html.Div([
