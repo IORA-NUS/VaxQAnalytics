@@ -13,8 +13,8 @@ class DataManager:
         self.dir_path = os.path.dirname(os.path.realpath(__file__))
 
         # self.df = pd.read_csv(f'{self.dir_path}/data/final_results_cleaned.csv')
-
-        self.df = pd.read_csv(f'{self.dir_path}/data/results_20210504_11hrs.csv')
+        # self.df = pd.read_csv(f'{self.dir_path}/data/results_20210504_11hrs.csv')
+        self.df = pd.read_csv(f'{self.dir_path}/data/results_cleaned_20210521.csv', dtype={'measure': 'str'})
 
         self.min_extents = self.df.min().to_dict()
         self.max_extents = self.df.max().to_dict()
@@ -27,6 +27,7 @@ class DataManager:
         self.RegistrationTime = self.df['RegistrationTime'].unique()
         self.VaccineTime = self.df['VaccineTime'].unique()
         self.WaitingTime = self.df['WaitingTime'].unique()
+        self.measure = self.df['measure'].unique()
 
 
     def check_threshold(self, row, max_wait_reg, max_wait_vac, max_wait_obs, max_QueueOutside):
@@ -34,6 +35,47 @@ class DataManager:
             row['W2'] <= max_wait_vac and \
             row['W3'] <= max_wait_obs and \
             row['QueueOutside'] <= max_QueueOutside
+
+    def expected_performance(self, scenario):
+
+        settings = scenario['settings']
+
+        all_cond = None
+        for key, val in  settings.items():
+            if all_cond is None:
+                all_cond = (self.df[key] == val)
+            else:
+                all_cond = all_cond & (self.df[key] == val)
+
+        expected_performance_df = self.df[all_cond & (self.df['NoPerDay']==scenario['NoPerDay']) & (self.df['measure']==scenario['measure'])]
+
+        if len(expected_performance_df) == 0:
+            retval = {
+                'W1': 'NA',
+                'W2': 'NA',
+                'W3': 'NA',
+                'QueueOutside': 'NA'
+            }
+        else:
+            # print(expected_performance_df)
+            expected_performance_df.reset_index(drop=True, inplace=True)
+            retval = {
+                'W1': expected_performance_df.at[0, 'W1'],
+                'W2': expected_performance_df.at[0, 'W2'],
+                'W3': expected_performance_df.at[0, 'W3'],
+                'QueueOutside': expected_performance_df.at[0, 'QueueOutside'],
+            }
+        #     expected_performance_df = pd.DataFrame([settings])
+        #     expected_performance_df['W1'] = 'NA'
+        #     expected_performance_df['W2'] = 'NA'
+        #     expected_performance_df['W3'] = 'NA'
+        #     expected_performance_df['QueueOutside'] = 'NA'
+
+        # expected_performance_df.fillna('inf', inplace=True)
+
+        # return expected_performance_df
+        # print(retval)
+        return retval
 
     def evaluate_scenario(self, scenario):
 
@@ -50,18 +92,19 @@ class DataManager:
             else:
                 all_cond = all_cond & (self.df[key] == val)
 
-        expected_performance_df = self.df[all_cond & (self.df['NoPerDay']==scenario['NoPerDay'])]
-        if len(expected_performance_df) == 0:
-            expected_performance_df = pd.DataFrame([settings])
-            expected_performance_df['W1'] = 'NA'
-            expected_performance_df['W2'] = 'NA'
-            expected_performance_df['W3'] = 'NA'
-            expected_performance_df['QueueOutside'] = 'NA'
+        # expected_performance_df = self.df[all_cond & (self.df['NoPerDay']==scenario['NoPerDay'])]
+        # if len(expected_performance_df) == 0:
+        #     expected_performance_df = pd.DataFrame([settings])
+        #     expected_performance_df['W1'] = 'NA'
+        #     expected_performance_df['W2'] = 'NA'
+        #     expected_performance_df['W3'] = 'NA'
+        #     expected_performance_df['QueueOutside'] = 'NA'
 
-        expected_performance_df.fillna('inf', inplace=True)
+        # expected_performance_df.fillna('inf', inplace=True)
         # print(expected_performance_df)
 
-        search_cond = (self.df['NoPerDay']==scenario['NoPerDay']) & \
+        search_cond = (self.df['measure']==scenario['measure']) & \
+                        (self.df['NoPerDay']==scenario['NoPerDay']) & \
                         (self.df['W1'] <= scenario['max_wait_reg']) & \
                         (self.df['W2'] <= scenario['max_wait_vac']) & \
                         (self.df['W3'] <= scenario['max_wait_obs']) & \
@@ -74,7 +117,7 @@ class DataManager:
         alternate_solutions = self.df[search_cond]
         alternate_solutions['score'] = 0
 
-        print(len(alternate_solutions))
+        # print(len(alternate_solutions))
 
         # print(f"Prep: {time.time() - now}")
         # now = time.time()
@@ -109,62 +152,6 @@ class DataManager:
             recommendation['error'] = 'Unable to Find a feasible alternative within the bounds'
 
 
-
-        # for k, v in settings.items():
-        #     cond = None
-        #     for key, val in  settings.items():
-        #         if key == k:
-        #             continue
-
-        #         if cond is None:
-        #             # cond = (self.df[key] == val)
-        #             cond = (alternate_solutions[key] == val)
-        #         else:
-        #             # cond = cond & (self.df[key] == val)
-        #             cond = cond & (alternate_solutions[key] == val)
-
-        #     # filtered_df = self.df[cond & (self.df['NoPerDay']==scenario['NoPerDay'])]
-        #     filtered_df = alternate_solutions[cond]
-
-        #     # if (len(filtered_df) == 0) or len(filtered_df[filtered_df[k]==v]) == 0:
-        #     if (len(filtered_df) == 0):
-        #         recommendation[k] = 'Unable to evaluate Scenario'
-        #     else:
-        #         filtered_base_df = filtered_df[(filtered_df[k]==v)].reset_index()
-        #         filtered_alt_df = filtered_df[~(filtered_df[k]==v)].reset_index()
-
-        #         if (len(filtered_base_df) > 0) and (self.check_threshold(filtered_base_df.loc[0], scenario['max_wait_reg'], scenario['max_wait_vac'], scenario['max_wait_obs'], scenario['max_QueueOutside'])):
-        #             recommendation[k] = 'Sufficient'
-        #         else:
-        #             found_solution = False
-        #             for index, row in filtered_alt_df[filtered_alt_df[k] > v].sort_values(k).iterrows():
-        #                 if self.check_threshold(row, scenario['max_wait_reg'], scenario['max_wait_vac'], scenario['max_wait_obs'], scenario['max_QueueOutside']):
-        #                     found_solution = True
-        #                     recommendation[k] = f"Suggest to Increase {k} to {int(row[k])}"
-        #                     break
-        #                     # if int(row[k]) > v:
-        #                     #     recommendation[k] = f"Suggest to Increase {k} to {int(row[k])}"
-        #                     # else:
-        #                     #     recommendation[k] = f"Suggest to  Decrease {k} to {int(row[k])}"
-        #                     # break
-        #             if not found_solution:
-        #                 for index, row in filtered_alt_df[filtered_alt_df[k] < v].sort_values(k, ascending=False).iterrows():
-        #                     if self.check_threshold(row, scenario['max_wait_reg'], scenario['max_wait_vac'], scenario['max_wait_obs'], scenario['max_QueueOutside']):
-        #                         found_solution = True
-        #                         recommendation[k] = f"Suggest to  Decrease {k} to {int(row[k])}"
-        #                         break
-        #                         # if int(row[k]) > v:
-        #                         #     recommendation[k] = f"Suggest to Increase {k} to {int(row[k])}"
-        #                         # else:
-        #                         #     recommendation[k] = f"Suggest to  Decrease {k} to {int(row[k])}"
-        #                         # break
-
-        #             if found_solution == False:
-        #                 recommendation[k] = f'Adjusting {k} between ({int(self.min_extents[k])}, {int(self.max_extents[k])}) has No Impact'
-
-        # # print(recommendation)
-
-        return recommendation, expected_performance_df, alternate_solutions
-
+        return recommendation, alternate_solutions
 
 

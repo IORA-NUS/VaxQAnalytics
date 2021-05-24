@@ -93,7 +93,7 @@ class DbManager:
                     if found_solution == False:
                         recommendation[k] = f'Adjusting {k} between ({int(self.min_extents[k])}, {int(self.max_extents[k])}) has No Impact'
 
-        print(recommendation)
+        # print(recommendation)
 
         all_cond = None
         for key, val in  settings.items():
