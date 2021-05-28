@@ -34,9 +34,9 @@ column_names = {
     "RegistrationDesks": "Num Registration Counters",
     "VaccineDesks": "Num Vaccine Counters",
     "SeatingCap": "Observation Area Seating Capacity",
-    "W1": "Waiting time for Registration (mins)",
-    "W2": "Waiting time for Vaccination (mins)",
-    "W3": "Waiting time to get seat for Observation (mins)",
+    "W1": "Waiting time for Registration (Secs)",
+    "W2": "Waiting time for Vaccination (Secs)",
+    "W3": "Waiting time to get seat for Observation (Secs)",
     "QueueOutside": "Queue at Registration Counter (Persons)",
     # "measure": "measure",
     "score": "Score",
@@ -53,9 +53,9 @@ app.layout = html.Div(children=[
         html.Div([
             html.Div([
                 html.Img(src='/static/CoBrand-IORA_H-web-1.png',style={'height': '50px', 'margin': '15px',}),
-            ], className="two columns", style={'margin-left': '20px'}),
+            ], className="two columns", style={'margin-left': '20px', 'width': '240px'}),
             html.Div([
-                html.Img(src='/static/VaxQALogo_thin.png',style={'height': '60px','margin': '10px',}),
+                html.Img(src='/static/VaxQALogo_thin.png',style={'height': '50px','margin': '15px',}),
             ], className="six columns"),
 
             dbc.Button("User Guide", id="open-xl", style={'margin': '20px', 'font-size': '14px'}),
@@ -352,7 +352,7 @@ app.layout = html.Div(children=[
                     html.P(children='Registration', style={'color': 'brown'}),
                     dcc.Dropdown(
                         id="max_wait_reg", #type="number", placeholder="input with range",
-                        options = [{'label': v, 'value': v} for v in range(5, 31, 5)],
+                        options = [{'label': v, 'value': v*60} for v in range(1, 31, 1)], # in 1 min buckets
                         value=5,
                         # min=0, max=10,
                         persistence=True,
@@ -365,7 +365,7 @@ app.layout = html.Div(children=[
                     html.P(children='Vaccination', style={'color': 'brown'}),
                     dcc.Dropdown(
                         id="max_wait_vac", #type="number", placeholder="input with range",
-                        options = [{'label': v, 'value': v} for v in range(1, 6, 1)],
+                        options = [{'label': v/2, 'value': v*60/2} for v in range(1, 11, 1)], # in 30 sec buckets
                         value=1,
                         # min=0, max=10,
                         persistence=True,
@@ -378,7 +378,7 @@ app.layout = html.Div(children=[
                     html.P(children='Observation', style={'color': 'brown'}),
                     dcc.Dropdown(
                         id="max_wait_obs", #type="number", placeholder="input with range",
-                        options = [{'label': v, 'value': v} for v in range(1, 6, 1)],
+                        options = [{'label': v/2, 'value': v*60/2} for v in range(1, 11, 1)], # in 30 sec buckets
                         value=1,
                         # min=0, max=10,
                         persistence=True,
@@ -539,7 +539,7 @@ def compute_expected_performance(
         # row_selectable='multi',
     )
 
-    sla_header = f'{percentile_options[percentile]} Waiting time SLA:'
+    sla_header = f'{percentile_options[percentile]} Waiting time SLA (Mins):'
 
     return [expected_performance_table, sla_header]
 

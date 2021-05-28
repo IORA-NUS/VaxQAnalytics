@@ -14,7 +14,9 @@ class DataManager:
 
         # self.df = pd.read_csv(f'{self.dir_path}/data/final_results_cleaned.csv')
         # self.df = pd.read_csv(f'{self.dir_path}/data/results_20210504_11hrs.csv')
-        self.df = pd.read_csv(f'{self.dir_path}/data/results_cleaned_20210521.csv', dtype={'measure': 'str'})
+        # self.df = pd.read_csv(f'{self.dir_path}/data/results_cleaned_20210521.csv', dtype={'measure': 'str'})
+        # self.df = pd.read_csv(f'{self.dir_path}/data/results_cleaned_20210527.csv', dtype={'measure': 'str'})
+        self.df = pd.read_csv(f'{self.dir_path}/data/results_cleaned_20210527.csv.zip', compression='infer', dtype={'measure': 'str'})
 
         self.min_extents = self.df.min().to_dict()
         self.max_extents = self.df.max().to_dict()
@@ -59,22 +61,14 @@ class DataManager:
         else:
             # print(expected_performance_df)
             expected_performance_df.reset_index(drop=True, inplace=True)
+            resp = expected_performance_df.loc[0]
             retval = {
-                'W1': expected_performance_df.at[0, 'W1'],
-                'W2': expected_performance_df.at[0, 'W2'],
-                'W3': expected_performance_df.at[0, 'W3'],
-                'QueueOutside': expected_performance_df.at[0, 'QueueOutside'],
+                'W1': resp.at['W1'], #f"{resp.at['W1']//60}:{resp.at['W1']%60}",
+                'W2': resp.at['W2'], #f"{resp.at['W2']//60}:{resp.at['W2']%60}",
+                'W3': resp.at['W3'], #f"{resp.at['W3']//60}:{resp.at['W3']%60}",
+                'QueueOutside': resp.at['QueueOutside'],
             }
-        #     expected_performance_df = pd.DataFrame([settings])
-        #     expected_performance_df['W1'] = 'NA'
-        #     expected_performance_df['W2'] = 'NA'
-        #     expected_performance_df['W3'] = 'NA'
-        #     expected_performance_df['QueueOutside'] = 'NA'
 
-        # expected_performance_df.fillna('inf', inplace=True)
-
-        # return expected_performance_df
-        # print(retval)
         return retval
 
     def evaluate_scenario(self, scenario):
@@ -91,17 +85,6 @@ class DataManager:
                 all_cond = (self.df[key] == val)
             else:
                 all_cond = all_cond & (self.df[key] == val)
-
-        # expected_performance_df = self.df[all_cond & (self.df['NoPerDay']==scenario['NoPerDay'])]
-        # if len(expected_performance_df) == 0:
-        #     expected_performance_df = pd.DataFrame([settings])
-        #     expected_performance_df['W1'] = 'NA'
-        #     expected_performance_df['W2'] = 'NA'
-        #     expected_performance_df['W3'] = 'NA'
-        #     expected_performance_df['QueueOutside'] = 'NA'
-
-        # expected_performance_df.fillna('inf', inplace=True)
-        # print(expected_performance_df)
 
         search_cond = (self.df['measure']==scenario['measure']) & \
                         (self.df['NoPerDay']==scenario['NoPerDay']) & \

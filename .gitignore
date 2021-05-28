@@ -6,6 +6,7 @@ results_backup/
 utility_simulator/raw_data/
 utility_simulator/archive/
 
+results*
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
