@@ -5,12 +5,18 @@ from os.path import isfile, join
 import pandas as pd
 from pathlib import Path
 
-from settings import settings
+from vaxqa.settings import settings
 
-if settings['env'] == 'local':
-    import localstack_client.session as boto3_session
-elif settings['env'] == 'dev':
+# if settings['env'] == 'local':
+#     import localstack_client.session as boto3_session
+# elif settings['env'] == 'dev':
+#     import boto3.session as boto3_session
+
+if os.environ.get("DASH_ENV") == "prod":
     import boto3.session as boto3_session
+else:
+    import localstack_client.session as boto3_session
+
 
 class S3Manager:
 
@@ -25,13 +31,18 @@ class S3Manager:
                                 )
 
         self.bucket = self.s3_client.Bucket(self.bucket_name)
+        # print(self.bucket.name, self.bucket.creation_date)
         if self.bucket.creation_date is None:
-            self.bucket.create(
-                        ACL='private',
-                        CreateBucketConfiguration={
-                            'LocationConstraint': 'ap-southeast-1'
-                        },
-                    )
+            try:
+                self.bucket.create(
+                            ACL='private',
+                            CreateBucketConfiguration={
+                                'LocationConstraint': 'ap-southeast-1'
+                            },
+                        )
+            except Exception as e:
+                print(e)
+                # raise(e)
 
     # def get_client(self):
     #     return self.s3_client

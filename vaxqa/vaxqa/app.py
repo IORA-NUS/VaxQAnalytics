@@ -1,17 +1,23 @@
+from collections import namedtuple
+import pkg_resources
 
-import dash_bootstrap_components as dbc
-import dash, os
+# backup true function
+_true_get_distribution = pkg_resources.get_distribution
+# create small placeholder for the dash call
+# _flask_compress_version = parse_version(get_distribution("flask-compress").version)
+_Dist = namedtuple('_Dist', ['version'])
 
-external_stylesheets = [dbc.themes.FLATLY, 'https://codepen.io/chriddyp/pen/bWLwgP.css', ]
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-# if os.environ["DASH_ENV"] == "production":
-#     app.config.from_object("config.ProductionConfig")
-# elif os.environ["DASH_ENV"] == "development":
-#     app.config.from_object("config.DevelopmentConfig")
-# elif os.environ["DASH_ENV"] == "testing":
-#     app.config.from_object("config.TestingConfig")
-# else:
-#     app.config.from_object("config.LocalConfig")
+def _get_distribution(dist):
+    if dist == 'flask-compress':
+        return _Dist('1.9.0') # your flask-compress version
+    else:
+        return _true_get_distribution(dist)
 
+
+# monkey patch the function so it can work once frozen and pkg_resources is of
+# no help
+pkg_resources.get_distribution = _get_distribution
+
+from .vaxqa import app, server
 

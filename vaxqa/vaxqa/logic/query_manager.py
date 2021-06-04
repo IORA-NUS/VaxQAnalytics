@@ -4,7 +4,7 @@ import pandas as pd
 import os, json, time
 
 from pathlib import Path
-from data_manager.data_handler import DataHandler
+from vaxqa.data_manager.data_handler import DataHandler
 
 
 class QueryManager:

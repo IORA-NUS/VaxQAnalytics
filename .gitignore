@@ -3,6 +3,8 @@ nas_analysis/
 archive/
 data/archive
 data_archive/
+.serverless/
+node_modules/
 
 results*
 .DS_Store

@@ -3,7 +3,7 @@ import pandas as pd
 import os, json, time
 
 from pathlib import Path
-from settings import settings
+from vaxqa.settings import settings
 from .s3_manager import S3Manager
 
 class DataHandler:

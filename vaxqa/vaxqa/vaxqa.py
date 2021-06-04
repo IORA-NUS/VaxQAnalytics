@@ -1,45 +1,61 @@
 
-import dash, json, dash_table, os
+import json, os
+import pandas as pd
+
+import dash
+import dash_auth
+from dash.dependencies import Input, Output, State
 from dash_html_components.Data import Data
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
-# import dash_daq as daq
 import dash_html_components as html
+
+import dash_table
 from dash_table.Format import Format
-import json
 
-from dash.dependencies import Input, Output, State
 
-import pandas as pd
-
-import plotly.express as px
 import plotly
+import plotly.express as px
 
 from statistics import median
 
-# from data_manager import DataManager
-# from data_manager_split import DataManagerSplit
-from logic.query_manager import QueryManager
-from app import app
+from vaxqa.logic.query_manager import QueryManager
+from vaxqa.user_db import USERNAME_PASSWORD_PAIRS
 
 # external_stylesheets = [dbc.themes.FLATLY, 'https://codepen.io/chriddyp/pen/bWLwgP.css', ]
 # app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+# server = app.server
 
-# if app.config["ENV"] == "production":
-#     app.config.from_object("config.ProductionConfig")
-# elif  app.config["ENV"] == "development":
-#     app.config.from_object("config.DevelopmentConfig")
-# elif  app.config["ENV"] == "testing":
-#     app.config.from_object("config.TestingConfig")
-# else:
-#     app.config.from_object("config.LocalConfig")
+from flask import Flask
+server = Flask(__name__)
+
+# @server.route("/")
+# def index():
+#     return "Hello Flask app"
+
+external_stylesheets = [dbc.themes.FLATLY, 'https://codepen.io/chriddyp/pen/bWLwgP.css', ]
+
+if os.environ.get('DASH_ENV') in ['prod', 'dev']:
+    app = dash.Dash(
+        __name__,
+        server=server,
+        external_stylesheets=external_stylesheets,
+        routes_pathname_prefix="/",
+        requests_pathname_prefix=f"/{os.environ.get('DASH_ENV')}/"
+    )
+    static_path = 'https://vaxqa-data.s3-ap-southeast-1.amazonaws.com/static'
+else:
+    app = dash.Dash(
+        __name__,
+        server=server,
+        external_stylesheets=external_stylesheets,
+    )
+    static_path = '/static'
 
 
+auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 
-# scenario = 'results_cleaned_20210521'
-# scenario = 'results_cleaned_20210527'
 
-# q_manager = DataManager()
 q_manager = QueryManager()
 extents = q_manager.get_extents()
 
@@ -71,10 +87,10 @@ app.layout = html.Div(children=[
     html.Div([
         html.Div([
             html.Div([
-                html.Img(src='/static/CoBrand-IORA_H-web-1.png',style={'height': '50px', 'margin': '15px',}),
+                html.Img(src=f'{static_path}/CoBrand-IORA_H-web-1.png',style={'height': '50px', 'margin': '15px',}),
             ], className="two columns", style={'margin-left': '20px', 'width': '240px'}),
             html.Div([
-                html.Img(src='/static/VaxQALogo_thin.png',style={'height': '50px','margin': '15px',}),
+                html.Img(src=f'{static_path}/VaxQALogo_thin.png',style={'height': '50px','margin': '15px',}),
             ], className="six columns"),
 
             dbc.Button("User Guide", id="open-xl", style={'margin': '20px', 'font-size': '14px'}),
@@ -94,7 +110,7 @@ app.layout = html.Div(children=[
                                 html.Ul([
                                     html.Li('Certain configurations might represent an unstable Queue System. In such cases, the "Expected Performance" section will report "NA" for all metrics'),
                                     html.Div([
-                                        html.Img(src='/static/expected_na.png',style={'width': '600px','margin': '15px',}),
+                                        html.Img(src=f'{static_path}/expected_na.png',style={'width': '600px','margin': '15px',}),
                                     ]),
                                     html.Li('To handle this situation, choose a different configuration. You can use the "Recommendation" module to identify the appropriate changes to the config'),
                                     # html.Li('Note: "NA" Indicates that the configuration cannot support the Arrival rate and results in ever increasing Queue length at the entry Station'),
@@ -118,11 +134,11 @@ app.layout = html.Div(children=[
                                 html.Ul([
                                     html.Li('Certain configurations might might cause an error to be reported by the "Recommendation" module'),
                                     html.Div([
-                                        html.Img(src='/static/rec_error.png',style={'width': '600px','margin': '15px',}),
+                                        html.Img(src=f'{static_path}/rec_error.png',style={'width': '600px','margin': '15px',}),
                                     ]),
                                     html.Li('This is because, the VC config does not satisfy the SLA requirements and also that the search criteria is too Stringent. To resolve this issue, change a few of the constraints from "Fixed" to "Search" '),
                                     html.Div([
-                                        html.Img(src='/static/rec_error_fix.png',style={'width': '600px','margin': '15px',}),
+                                        html.Img(src=f'{static_path}/rec_error_fix.png',style={'width': '600px','margin': '15px',}),
                                     ]),
                                 ]),
 
@@ -157,7 +173,7 @@ app.layout = html.Div(children=[
 
     html.Div([
         html.Div([
-            html.Img(src='/static/process.png',style={'width': '100%',}),
+            html.Img(src=f'{static_path}/process.png',style={'width': '100%',}),
         ], className="eight columns"),
     ], className="row", style={'margin-left': '10px', 'margin-top': '80px', 'margin-bottom': '10px'}),
 
@@ -367,12 +383,15 @@ app.layout = html.Div(children=[
 
             # html.Div([html.Br()]),
 
-            html.Div([
+            dcc.Loading(
                 html.Div([
-                    html.H3(children='Expected performance', style={'color': 'RebeccaPurple'}),
-                        html.Div(id='expected_performance'),
-                ], className="one column", style={'width': '70%'}),
-            ], className="row", style={ 'margin-left': '0px'}),
+                    html.Div([
+                        html.H3(children='Expected performance', style={'color': 'RebeccaPurple'}),
+                            html.Div(id='expected_performance'),
+                    ], className="one column", style={'width': '70%'}),
+                ], className="row", style={ 'margin-left': '0px'}),
+                type='circle',
+            ),
 
             # html.Div([html.Br()]),
 
@@ -461,16 +480,22 @@ app.layout = html.Div(children=[
             html.Div([
                 html.H3(children='Recommended Actions'),
             ], className="row", style={'width': '80%', 'color': '#3D9970'}),
-            html.Div([
-                html.Div(id='recommendation_table'),
-            ], className="row", style={'width': '80%'}),
+            dcc.Loading(
+                html.Div([
+                    html.Div(id='recommendation_table'),
+                ], className="row", style={'width': '80%'}),
+                type='circle',
+            ),
 
             html.Div([
                 html.H3(children='Alternate Options'),
             ], className="row", style={'width': '80%', 'color': 'DimGray'}),
-            html.Div([
-                html.Div(id='alternate_solutions'),
-            ], className="row",),
+            dcc.Loading(
+                html.Div([
+                    html.Div(id='alternate_solutions'),
+                ], className="row",),
+                type='circle',
+            ),
 
         ], className="eight columns", style={'margin-left': '80px'}),
 
@@ -490,6 +515,7 @@ app.callback(
     [State("modal-xl", "is_open")],
 )(toggle_modal)
 
+
 @app.callback([
         Output('expected_performance', 'children'),
         Output("sla_header", "children"),
@@ -503,9 +529,7 @@ app.callback(
         Input('VaccineTime', 'value'),
         Input('WaitingTime', 'value'),
         Input('percentile', 'value')
-    ],
-
-    )
+    ],)
 def compute_expected_performance(
                             NoPerDay,
                             RegistrationDesks,
@@ -799,7 +823,6 @@ def compute_recommendation(n, RegistrationDesks, RegistrationDeskSearch,
         return results_table, alternate_solutions_table, 0
 
     return None, None, 0
-
 
 
 if __name__ == '__main__':

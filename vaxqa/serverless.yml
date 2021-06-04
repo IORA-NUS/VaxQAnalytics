@@ -1,0 +1,51 @@
+---
+service: vaxqa-serverless
+
+variablesResolutionMode: 20210219
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: python3.8
+  timeout: 30
+  stage: prod
+  region: ap-southeast-1
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 's3:CreateBucket'
+        - 's3:ListBucket'
+        - 's3:GetObject'
+        - 's3:*'
+      Resource:
+        - 'arn:aws:s3:::*'
+  apiGateway:
+    shouldStartNameWithService: true
+  lambdaHashingVersion: 20201221
+  environment:
+    DASH_ENV: prod
+
+functions:
+  app:
+    handler: wsgi_handler.handler
+    events:
+      - http: ANY /
+      - http: "ANY /{proxy+}"
+
+custom:
+  wsgi:
+    app: vaxqa.app.server
+    pythonBin: python3
+    packRequirements: false
+  pythonRequirements:
+    dockerizePip: true
+    slim: true
+    strip: false
+
+plugins:
+  - serverless-wsgi
+  - serverless-python-requirements
+package:
+  exclude:
+    - node_modules/**
+    # and other
