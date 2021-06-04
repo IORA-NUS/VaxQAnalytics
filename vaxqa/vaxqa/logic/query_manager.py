@@ -102,6 +102,7 @@ class QueryManager:
 
     def evaluate_scenario(self, scenario):
 
+        # print(scenario)
         # self.refresh_df(scenario['NoPerDay'], scenario['measure'])
         self.df = self.data_set.refresh_df(scenario['NoPerDay'], scenario['measure'])
 
@@ -166,7 +167,8 @@ class QueryManager:
         else:
             recommendation['error'] = 'Unable to Find a feasible alternative within the bounds'
 
+        # print(recommendation)
 
-        return recommendation, alternate_solutions
+        return recommendation, alternate_solutions.head(100)
 
 

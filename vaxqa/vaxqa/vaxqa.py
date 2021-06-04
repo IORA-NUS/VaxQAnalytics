@@ -52,8 +52,9 @@ else:
     )
     static_path = '/static'
 
+    auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 
-auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
+# auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 
 
 q_manager = QueryManager()
@@ -621,7 +622,6 @@ def compute_expected_performance(
 
 @app.callback([
         Output('recommendation_table', 'children'),
-        # Output('expected_performance', 'children'),
         Output('alternate_solutions', 'children'),
         Output('compute_recommendation', 'n_clicks'),
     ],
