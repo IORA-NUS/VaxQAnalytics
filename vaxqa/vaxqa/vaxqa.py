@@ -35,7 +35,7 @@ server = Flask(__name__)
 
 external_stylesheets = [dbc.themes.FLATLY, 'https://codepen.io/chriddyp/pen/bWLwgP.css', ]
 
-if os.environ.get('DASH_ENV') in ['prod', 'dev']:
+if os.environ.get('DASH_ENV') in ['prod']:
     app = dash.Dash(
         __name__,
         server=server,
