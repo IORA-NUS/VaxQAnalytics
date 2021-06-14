@@ -407,7 +407,7 @@ app.layout = html.Div(children=[
             html.P(children='Seating Capacity at Registration', style={'color': 'brown'}),
             dcc.Dropdown(
                 id="max_QueueOutside", #type="number", placeholder="input with range",
-                options = [{'label': v, 'value': v} for v in range(60, 251, 10)],
+                options = [{'label': v, 'value': v} for v in range(0, 251, 1)],
                 value=100,
                 # min=10, max=100, step=5,
                 persistence=True,
