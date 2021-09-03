@@ -3,21 +3,21 @@ import os
 prod_settings = {
     'debug': False,
     'data_backend': 's3', # 'folder' | 's3'
-    'scenario': 'results_cleaned_20210527', # 'results_cleaned_20210527' | 'results_cleaned_20210521'
+    'scenario': 'results_cleaned_20210612', # 'results_cleaned_20210527' | 'results_cleaned_20210521'
     # port: DO NOT UPDATE
 }
 
 dev_settings = {
     'debug': False,
     'data_backend': 'folder', # 'folder' | 's3'
-    'scenario': 'results_cleaned_20210527', # 'results_cleaned_20210527' | 'results_cleaned_20210521'
+    'scenario': 'results_cleaned_20210612', # 'results_cleaned_20210527' | 'results_cleaned_20210521'
     'port': 8100
 }
 
 local_settings = {
     'debug': True,
     'data_backend': 'folder', # 'folder' | 's3'
-    'scenario': 'results_cleaned_20210527', # 'results_cleaned_20210527' | 'results_cleaned_20210521'
+    'scenario': 'results_cleaned_20210612', # 'results_cleaned_20210527' | 'results_cleaned_20210521'
     'port': 8100
 }
 

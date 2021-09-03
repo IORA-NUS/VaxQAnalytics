@@ -1,6 +1,7 @@
 import math
 
 def simulateQApprox(N,s1,s2,s3,k1,k2,k3, ptile='Avg'):
+    # print(N,s1,s2,s3,k1,k2,k3, ptile)
     As = N/840
     mu1 =  1/s1
     mu2 = 1/s2
@@ -9,13 +10,14 @@ def simulateQApprox(N,s1,s2,s3,k1,k2,k3, ptile='Avg'):
     rho2 = As/(k2*mu2)
     rho3 = As/(k3*mu3)
     T = 30
+    # print(rho1, rho2, rho3)
 
     if rho1 >= 1:
-        return (N,s1,s2,s3,k1,k2,k3,'nan','nan','nan','nan')
+        return (N,s1,s2,s3,k1,k2,k3,'NA','NA','NA','NA')
     if rho2 >= 1:
-        return (N,s1,s2,s3,k1,k2,k3,'nan','nan','nan','nan')
+        return (N,s1,s2,s3,k1,k2,k3,'NA','NA','NA','NA')
     if rho3 >= 1:
-        return (N,s1,s2,s3,k1,k2,k3,'nan','nan','nan','nan')
+        return (N,s1,s2,s3,k1,k2,k3,'NA','NA','NA','NA')
 
     #Compute W1,
     One_over_P0 = pow(k1*rho1,k1)/((1-rho1)*(math.sqrt(2*math.pi*k1)*(k1/math.e)**k1))
@@ -73,14 +75,16 @@ def simulateQApprox(N,s1,s2,s3,k1,k2,k3, ptile='Avg'):
     W195s = math.ceil(W195*60)
     W295s = math.ceil(W295*60)
     W395s = math.ceil(W395*60)
+    # print(L3)
+    # L3 = math.ceil(L3)
     L390 =  math.ceil(L390)
     L395 =  math.ceil(L395)
 
     if ptile == 'Avg':
         return (N,s1,s2,s3,k1,k2,k3,W1s,W2s,W3s,L3)
-    elif ptile == 90:
+    elif (ptile == 90) or (ptile == '90'):
         return (N,s1,s2,s3,k1,k2,k3,W190s,W290s,W390s,L390)
-    elif ptile == 95:
+    elif (ptile == 95) or (ptile == '95'):
         return (N,s1,s2,s3,k1,k2,k3,W195s,W295s,W395s,L395)
 
 
