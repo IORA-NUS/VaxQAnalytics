@@ -28,6 +28,7 @@ from vaxqa.user_db import USERNAME_PASSWORD_PAIRS
 
 from flask import Flask
 server = Flask(__name__)
+# server.config['APPLICATION_ROOT'] = '/vaxqa'
 
 # @server.route("/")
 # def index():
@@ -39,23 +40,25 @@ if os.environ.get('DASH_ENV') in ['prod']:
     app = dash.Dash(
         __name__,
         server=server,
+        url_base_pathname='/vaxqa/',
         external_stylesheets=external_stylesheets,
         routes_pathname_prefix="/",
         requests_pathname_prefix=f"/{os.environ.get('DASH_ENV')}/"
     )
-    static_path = 'https://vaxqa-data.s3-ap-southeast-1.amazonaws.com/static'
+    # static_path = 'https://vaxqa-data.s3-ap-southeast-1.amazonaws.com/static'
 else:
     app = dash.Dash(
         __name__,
         server=server,
+        url_base_pathname='/vaxqa/',
         external_stylesheets=external_stylesheets,
     )
-    static_path = '/static'
+    # static_path = '/static'
 
-    auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
+
+    # auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 
 # auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
-
 
 q_manager = QueryManager()
 extents = q_manager.get_extents()
@@ -88,10 +91,12 @@ app.layout = html.Div(children=[
     html.Div([
         html.Div([
             html.Div([
-                html.Img(src=f'{static_path}/CoBrand-IORA_H-web-1.png',style={'height': '50px', 'margin': '15px',}),
+                # html.Img(src=f'{static_path}/CoBrand-IORA_H-web-1.png',style={'height': '50px', 'margin': '15px',}),
+                html.Img(src=app.get_asset_url('CoBrand-IORA_H-web-1.png'),style={'height': '50px', 'margin': '15px',}),
             ], className="two columns", style={'margin-left': '20px', 'width': '240px'}),
             html.Div([
-                html.Img(src=f'{static_path}/VaxQALogo_thin.png',style={'height': '50px','margin': '15px',}),
+                # html.Img(src=f'{static_path}/VaxQALogo_thin.png',style={'height': '50px','margin': '15px',}),
+                html.Img(src=app.get_asset_url('VaxQALogo_thin.png'),style={'height': '50px','margin': '15px',}),
             ], className="six columns"),
 
             dbc.Button("User Guide", id="open-xl", style={'margin': '20px', 'font-size': '14px'}),
@@ -111,7 +116,8 @@ app.layout = html.Div(children=[
                                 html.Ul([
                                     html.Li('Certain configurations might represent an unstable Queue System. In such cases, the "Expected Performance" section will report "NA" for all metrics'),
                                     html.Div([
-                                        html.Img(src=f'{static_path}/expected_na.png',style={'width': '600px','margin': '15px',}),
+                                        # html.Img(src=f'{static_path}/expected_na.png',style={'width': '600px','margin': '15px',}),
+                                        html.Img(src=app.get_asset_url('expected_na.png'),style={'width': '600px','margin': '15px',}),
                                     ]),
                                     html.Li('To handle this situation, choose a different configuration. You can use the "Recommendation" module to identify the appropriate changes to the config'),
                                     # html.Li('Note: "NA" Indicates that the configuration cannot support the Arrival rate and results in ever increasing Queue length at the entry Station'),
@@ -135,11 +141,13 @@ app.layout = html.Div(children=[
                                 html.Ul([
                                     html.Li('Certain configurations might might cause an error to be reported by the "Recommendation" module'),
                                     html.Div([
-                                        html.Img(src=f'{static_path}/rec_error.png',style={'width': '600px','margin': '15px',}),
+                                        # html.Img(src=f'{static_path}/rec_error.png',style={'width': '600px','margin': '15px',}),
+                                        html.Img(src=app.get_asset_url('rec_error.png'),style={'width': '600px','margin': '15px',}),
                                     ]),
                                     html.Li('This is because, the VC config does not satisfy the SLA requirements and also that the search criteria is too Stringent. To resolve this issue, change a few of the constraints from "Fixed" to "Search" '),
                                     html.Div([
-                                        html.Img(src=f'{static_path}/rec_error_fix.png',style={'width': '600px','margin': '15px',}),
+                                        # html.Img(src=f'{static_path}/rec_error_fix.png',style={'width': '600px','margin': '15px',}),
+                                        html.Img(src=app.get_asset_url('rec_error_fix.png'),style={'width': '600px','margin': '15px',}),
                                     ]),
                                 ]),
 
@@ -174,7 +182,8 @@ app.layout = html.Div(children=[
 
     html.Div([
         html.Div([
-            html.Img(src=f'{static_path}/process.png',style={'width': '100%',}),
+            # html.Img(src=f'{static_path}/process.png',style={'width': '100%',}),
+            html.Img(src=app.get_asset_url('process.png'),style={'width': '100%',}),
         ], className="eight columns"),
     ], className="row", style={'margin-left': '10px', 'margin-top': '80px', 'margin-bottom': '10px'}),
 
@@ -827,3 +836,4 @@ def compute_recommendation(n, RegistrationDesks, RegistrationDeskSearch,
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8100)
+
